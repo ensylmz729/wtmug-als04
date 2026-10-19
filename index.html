@@ -248,8 +248,8 @@ const state = {
   lastProduct: null,
   videoTrack: null,
   flashOn: false,
-  isContinuous: false, // Sürekli tarama açık mı?
-  lockedBarcode: null  // Tekli taramada kilitlenen barkod
+  isContinuous: false,
+  lockedBarcode: null
 };
 
 const DEDUPE_MS = 1500;
@@ -276,14 +276,12 @@ function setMode(mode){
 $("tab-single").addEventListener("click", () => setMode("single"));
 $("tab-cart").addEventListener("click", () => setMode("cart"));
 
-// Sürekli Tarama Switch Değişimi
 $("continuousScanToggle").addEventListener("change", (e) => {
   state.isContinuous = e.target.checked;
   $("scanModeDesc").textContent = state.isContinuous 
     ? "Açık: Barkod okundukça üst üste ekler" 
     : "Kapalı: Aynı barkodu 1 kez okur";
   
-  // Mod değiştiğinde kilitleri sıfırla
   state.lockedBarcode = null;
   state.lastScan = { code: null, time: 0 };
 });
@@ -356,20 +354,17 @@ $("clearCartBtn").addEventListener("click", () => {
 });
 
 /* =========================================================
-   7) BARKOD İŞLEME (MANTIK GÜNCELLENDİ)
+   7) BARKOD İŞLEME
    ========================================================= */
 function processBarcode(code){
   code = String(code).trim();
   if(!code) return;
 
-  // TEKLİ TARAMA KİLİDİ:
-  // Eğer sürekli tarama KAPALIYSA ve aynı barkod hala kamerada duruyorsa okuma yapma.
   if (!state.isContinuous && state.lockedBarcode === code) {
     return; 
   }
 
   const now = Date.now();
-  // Sürekli tarama modunda 1.5 saniye bekleme kuralı geçerli
   if(state.isContinuous && state.lastScan.code === code && (now - state.lastScan.time) < DEDUPE_MS){
     return;
   }
@@ -384,7 +379,6 @@ function processBarcode(code){
   }
   if (navigator.vibrate) navigator.vibrate(50);
 
-  // Eğer sürekli tarama kapalıysa, bu barkodu kilitle (kameradan çıkana kadar)
   if (!state.isContinuous) {
     state.lockedBarcode = code;
   }
@@ -404,7 +398,6 @@ $("manualBtn").addEventListener("click", () => {
   const code = $("manualInput").value.trim();
   if(!code){ showAlert("Lütfen bir barkod girin.", "warn"); return; }
   
-  // Elle giriş yapıldığında kilidi aç
   state.lockedBarcode = null; 
   state.lastScan = { code: null, time: 0 };
   
@@ -420,7 +413,6 @@ $("manualInput").addEventListener("keydown", e => {
    ========================================================= */
 function setScannerMsg(msg){ $("scannerMsg").textContent = msg; }
 
-// Flaş Butonu
 $("flashBtn").addEventListener("click", async () => {
   if(!state.videoTrack) return;
   try {
@@ -435,7 +427,6 @@ $("flashBtn").addEventListener("click", async () => {
   }
 });
 
-// Zoom Slider
 $("zoomSlider").addEventListener("input", async (e) => {
   if(!state.videoTrack) return;
   const zoomValue = parseFloat(e.target.value);
@@ -443,14 +434,12 @@ $("zoomSlider").addEventListener("input", async (e) => {
     await state.videoTrack.applyConstraints({
       advanced: [{ zoom: zoomValue }]
     });
-  } catch (err) {
-    console.warn("Zoom uygulanamadı:", err);
-  }
+  } catch (err) {}
 });
 
 async function startCamera(){
   $("alertBox").classList.remove("show");
-  state.lockedBarcode = null; // Kamerayı her başlatışta kilidi sıfırla
+  state.lockedBarcode = null;
 
   if(typeof ZXing === "undefined" || !ZXing.BrowserMultiFormatReader){
     showAlert("Barkod okuyucu kütüphanesi yüklenemedi.", "error");
@@ -500,13 +489,10 @@ async function startCamera(){
     state.codeReader = new ZXing.BrowserMultiFormatReader();
     state.codeReader.decodeFromVideoElement(videoElement, (result, err) => {
       if (result) {
-        // BARKOD OKUNDU
         processBarcode(result.getText());
       } else {
-        // BARKOD BULUNAMADI (Kare boş)
-        // Eğer kilitliyse ve kamerada o barkod artık yoksa, kilidi aç!
+        // Kamera boşsa ve kilit varsa, kilidi aç.
         if (!state.isContinuous && state.lockedBarcode !== null) {
-          // Kamera boşsa, kilitli barkodu serbest bırak ki başka ürün okutulabilsin
           state.lockedBarcode = null; 
         }
       }
@@ -526,4 +512,57 @@ async function startCamera(){
       setScannerMsg("Kamera yok.");
     } else {
       showAlert("Kamera hatası: " + (err.message || err.name), "error");
-      setScannerMsg("Kamera hat
+      setScannerMsg("Kamera hatası.");
+    }
+    stopCamera();
+  }
+}
+
+function stopCamera(){
+  state.scanning = false;
+  state.flashOn = false;
+  state.videoTrack = null;
+  state.lockedBarcode = null;
+  
+  $("flashBtn").classList.remove("active");
+  $("cameraControls").classList.add("hidden");
+
+  if(state.codeReader){
+    state.codeReader.reset();
+    state.codeReader = null;
+  }
+  
+  const video = $("video");
+  if(video.srcObject){
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+  
+  $("startBtn").classList.remove("hidden");
+  $("stopBtn").classList.add("hidden");
+  setScannerMsg("Kamera durduruldu.");
+}
+
+$("startBtn").addEventListener("click", startCamera);
+$("stopBtn").addEventListener("click", stopCamera);
+
+/* =========================================================
+   10) BAŞLANGIÇ
+   ========================================================= */
+renderCart();
+setMode("single");
+setScannerMsg("Kamerayı başlatmak için butona basın.");
+
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden && state.scanning) stopCamera();
+});
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
