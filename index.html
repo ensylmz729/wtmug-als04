@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0a7d4f" />
+<meta name="theme-color" content="#7b1f2e" />
 <title>MarketScan - Barkod Okuyucu</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,156 +11,92 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --primary:#0a7d4f; 
-    --primary-light:#10b981;
-    --primary-dark:#065f46; 
-    --bg:#f8fafc; 
+    --primary:#7b1f2e;
+    --primary-light:#a83245;
+    --primary-dark:#52101b;
+    --accent:#d4af37;
+    --bg:#fdfbfb;
     --card:#ffffff;
-    --text:#0f172a; 
-    --text-muted:#64748b; 
-    --danger:#ef4444; 
-    --warn:#f59e0b;
-    --border:#e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --text:#1e1315;
+    --text-muted:#8a7375;
+    --danger:#e11d48;
+    --warn:#d97706;
+    --border:#f0e3e5;
+    --shadow-sm: 0 1px 3px rgba(123,31,46,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(123,31,46,0.1), 0 2px 4px -1px rgba(123,31,46,0.06);
   }
-  
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  
   body {
-    margin:0; 
-    font-family:'Outfit', system-ui, -apple-system, sans-serif;
-    background-color:var(--bg); 
-    color:var(--text); 
-    padding-bottom:100px; /* Alt bar için boşluk */
+    margin:0; font-family:'Outfit', system-ui, -apple-system, sans-serif;
+    background-color:var(--bg); color:var(--text); padding-bottom:100px;
   }
-
-  /* --- HEADER --- */
   header{
     background:linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color:#fff; 
-    padding:20px 24px;
-    display:flex; 
-    align-items:center; 
-    gap:12px; 
-    position:sticky; 
-    top:0; 
-    z-index:20;
-    box-shadow:var(--shadow-md);
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    color:#fff; padding:20px 24px; display:flex; align-items:center; gap:12px;
+    position:sticky; top:0; z-index:20; box-shadow:var(--shadow-md);
+    border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
   }
-  header .logo{font-size:28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));}
-  header h1{font-size:22px; margin:0; font-weight:800; letter-spacing:0.5px}
-
-  /* --- MOD SEÇİCİ (TABS) --- */
-  .mode-tabs{
-    display:flex; 
-    gap:12px; 
-    padding:20px 20px 0;
-  }
+  header .logo{font-size:28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));}
+  header h1{font-size:22px; margin:0; font-weight:800; letter-spacing:0.5px; color: #fff;}
+  header h1 span { color: var(--accent); }
+  .mode-tabs{ display:flex; gap:12px; padding:20px 20px 0; }
   .mode-tabs button{
-    flex:1; 
-    padding:14px; 
-    border:none; 
-    border-radius:14px; 
-    font-size:15px;
-    font-family: inherit;
-    font-weight:600; 
-    background:var(--card); 
-    color:var(--text-muted); 
-    cursor:pointer;
-    box-shadow:var(--shadow-sm);
+    flex:1; padding:14px; border:none; border-radius:14px; font-size:15px;
+    font-family: inherit; font-weight:600; background:var(--card); color:var(--text-muted);
+    cursor:pointer; box-shadow:var(--shadow-sm); border: 1px solid var(--border);
     transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .mode-tabs button.active {
-    background:var(--primary); 
-    color:#fff; 
-    box-shadow:0 4px 12px rgba(10,125,79,0.3);
-    transform:translateY(-2px);
+    background:var(--primary); color:#fff; border-color: var(--primary);
+    box-shadow:0 4px 12px rgba(123,31,46,0.3); transform:translateY(-2px);
   }
-
-  /* --- ANA İÇERİK --- */
   main{padding:20px; max-width:600px; margin:0 auto;}
-  
   .card{
-    background:var(--card); 
-    border-radius:20px; 
-    padding:20px;
-    box-shadow:var(--shadow-md); 
-    margin-bottom:20px;
-    border: 1px solid var(--border);
-    transition: transform 0.3s ease;
+    background:var(--card); border-radius:20px; padding:20px;
+    box-shadow:var(--shadow-md); margin-bottom:20px; border: 1px solid var(--border);
   }
   .section-title {
-    font-size:16px; 
-    font-weight:700; 
-    margin:0 0 16px; 
-    color:var(--text);
-    display:flex; 
-    align-items:center; 
-    gap:8px;
+    font-size:16px; font-weight:700; margin:0 0 16px; color:var(--primary-dark);
+    display:flex; align-items:center; gap:8px;
   }
   .section-title::before {
-    content:''; 
-    display:inline-block; 
-    width:4px; 
-    height:16px; 
-    background:var(--primary); 
-    border-radius:4px;
+    content:''; display:inline-block; width:4px; height:16px;
+    background:var(--accent); border-radius:4px;
   }
-
-  /* --- KAMERA --- */
   .scanner-wrap{
-    position:relative; 
-    width:100%; 
-    aspect-ratio:4/3; 
-    background:#0f172a;
-    border-radius:16px; 
-    overflow:hidden; 
-    margin-bottom:16px;
+    position:relative; width:100%; aspect-ratio:4/3; background:#1a1113;
+    border-radius:16px; overflow:hidden; margin-bottom:16px;
   }
   #video{width:100%; height:100%; object-fit:cover; display:block}
-  
   .scan-frame{
-    position:absolute; inset:12% 8%; border:2px solid rgba(255,255,255,0.4);
+    position:absolute; inset:12% 8%; border:2px solid rgba(212, 175, 55, 0.6);
     border-radius:16px; pointer-events:none;
   }
   .scan-frame::after{
     content:""; position:absolute; left:0; right:0; top:0; height:2px;
-    background:var(--primary-light); box-shadow: 0 0 8px var(--primary-light);
+    background:var(--accent); box-shadow: 0 0 10px var(--accent);
     animation:scanline 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
-  @keyframes scanline{
-    0%{top:5%; opacity: 0;}
-    10%{opacity: 1;}
-    90%{opacity: 1;}
-    100%{top:95%; opacity: 0;}
-  }
+  @keyframes scanline{ 0%{top:5%; opacity: 0;} 10%{opacity: 1;} 90%{opacity: 1;} 100%{top:95%; opacity: 0;} }
   .scanner-msg{
     position:absolute; bottom:0; left:0; right:0; padding:12px;
-    background:linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
+    background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     color:#fff; font-size:14px; text-align:center; font-weight: 500;
   }
-
-  /* --- BUTONLAR --- */
   .btn{
     width:100%; padding:16px; border:none; border-radius:14px; font-size:16px;
     font-family: inherit; font-weight:700; cursor:pointer; transition:all 0.2s;
     display:flex; justify-content:center; align-items:center; gap:8px;
   }
-  .btn-primary{background:var(--primary); color:#fff; box-shadow:0 4px 12px rgba(10,125,79,0.2);}
+  .btn-primary{background:var(--primary); color:#fff; box-shadow:0 4px 12px rgba(123,31,46,0.2);}
   .btn-primary:active{background:var(--primary-dark); transform:scale(0.98);}
-  .btn-ghost{background:var(--bg); color:var(--text); border:2px solid var(--border); margin-top:10px;}
+  .btn-ghost{background:var(--bg); color:var(--primary); border:2px solid var(--primary-light); margin-top:10px;}
   .btn-ghost:active{background:var(--border);}
-
-  /* --- MANUEL GİRİŞ --- */
   .manual-row{display:flex; gap:10px; margin-top:10px;}
   .manual-row input{
     flex:1; padding:16px; border:2px solid var(--border); border-radius:14px;
     font-size:16px; font-family:inherit; outline:none; background:var(--bg);
-    transition:border-color 0.3s;
+    transition:border-color 0.3s; color:var(--text);
   }
   .manual-row input:focus{border-color:var(--primary); background: #fff;}
   .manual-row button{
@@ -168,78 +104,65 @@
     color:#fff; font-size:20px; cursor:pointer; transition:transform 0.2s;
   }
   .manual-row button:active{transform:scale(0.95);}
-
-  /* --- UYARILAR --- */
   .alert{
     padding:14px 16px; border-radius:12px; font-size:14px; font-weight:600; margin-bottom:16px;
     display:none; animation:slideDown 0.3s ease;
   }
   @keyframes slideDown { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
   .alert.show{display:block}
-  .alert-error{background:#fef2f2; color:var(--danger); border-left:4px solid var(--danger)}
+  .alert-error{background:#fff1f2; color:var(--danger); border-left:4px solid var(--danger)}
   .alert-warn{background:#fffbeb; color:var(--warn); border-left:4px solid var(--warn)}
-  .alert-success{background:#ecfdf5; color:var(--primary); border-left:4px solid var(--primary)}
-
-  /* --- ÜRÜN KARTI (TEKLİ) --- */
+  .alert-success{background:#fdf8f5; color:var(--primary); border-left:4px solid var(--primary)}
   .product-info{display:none}
   .product-info.show{display:block; animation:fade .4s ease-out}
   @keyframes fade{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
-  
   .p-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-  .p-title{font-size:22px; font-weight:800; margin:0 0 4px; line-height: 1.2;}
+  .p-title{font-size:22px; font-weight:800; margin:0 0 4px; line-height: 1.2; color:var(--primary-dark);}
   .p-brand{color:var(--text-muted); font-size:15px; font-weight: 500;}
-  .badge { background: var(--bg); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--primary); border: 1px solid var(--border); }
-  
+  .badge { background:var(--bg); padding:6px 12px; border-radius:20px; font-size:12px; font-weight: 700; color:var(--primary); border: 1px solid var(--border); }
   .p-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px}
-  .p-item{background:var(--bg); border-radius:14px; padding:12px}
+  .p-item{background:var(--bg); border-radius:14px; padding:12px; border: 1px solid var(--border);}
   .p-item .k{font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;}
   .p-item .v{font-size:16px; font-weight:700; word-break:break-word}
-  
   .price-tag{
-    display:inline-block; background:linear-gradient(135deg, var(--primary), var(--primary-light)); 
-    color:#fff; font-size:24px; font-weight:800; padding:12px 20px; border-radius:16px; 
-    margin-top:20px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); width: 100%; text-align: center;
+    display:inline-block; background:linear-gradient(135deg, var(--primary), var(--primary-light));
+    color:#fff; font-size:24px; font-weight:800; padding:14px 20px; border-radius:16px;
+    margin-top:20px; box-shadow: 0 6px 20px rgba(123,31,46,0.3); width: 100%; text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
   }
-
-  /* --- SEPET --- */
   .cart-list{list-style:none; margin:0; padding:0; display:none}
   .cart-list.show{display:block}
   .cart-list li{
     display:flex; justify-content:space-between; align-items:center; gap:12px;
-    padding:16px 0; border-bottom:1px solid var(--border);
-    animation: fade 0.3s ease;
+    padding:16px 0; border-bottom:1px solid var(--border); animation: fade 0.3s ease;
   }
   .cart-list li:last-child{border-bottom:none}
-  .cart-list .name{font-weight:700; font-size:15px; margin-bottom: 4px;}
+  .cart-list .name{font-weight:700; font-size:15px; margin-bottom: 4px; color:var(--primary-dark);}
   .cart-list .sub{font-size:13px; color:var(--text-muted)}
   .cart-list .lp{font-weight:800; color:var(--primary); font-size: 16px;}
   .cart-list .rm{
-    background:#fef2f2; color:var(--danger); border:none; border-radius:10px;
+    background:#fff1f2; color:var(--danger); border:none; border-radius:10px;
     width:36px; height:36px; font-size:20px; line-height:1; cursor:pointer; flex-shrink:0;
     transition: 0.2s;
   }
   .cart-list .rm:active{ transform: scale(0.9); }
-  
   .empty-cart{text-align:center; color:var(--text-muted); padding:30px 0; font-size:15px; line-height: 1.5;}
-
-  /* --- ALT SEPET BARI --- */
   .cart-total{
-    position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.95); 
+    position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.95);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     padding:16px 20px; border-top: 1px solid var(--border);
-    box-shadow:0 -4px 20px rgba(0,0,0,0.08); display:none; align-items:center;
+    box-shadow:0 -4px 24px rgba(123,31,46,0.1); display:none; align-items:center;
     justify-content:space-between; z-index:30;
   }
   .cart-total.show{display:flex}
   .cart-total .label{font-size:13px; font-weight: 600; color:var(--text-muted); margin-bottom: 2px;}
   .cart-total .sum{font-size:26px; font-weight:800; color:var(--primary); line-height: 1;}
   .cart-total button{
-    padding:14px 20px; border:none; border-radius:14px; background:#fef2f2;
+    padding:14px 20px; border:none; border-radius:14px; background:#fff1f2;
     color:var(--danger); font-weight:700; cursor:pointer; font-size:15px;
-    transition: 0.2s;
+    transition: 0.2s; border: 1px solid #ffe4e6;
   }
   .cart-total button:active{ background: var(--danger); color: #fff; }
-
   .hidden{display:none !important}
   footer{text-align:center; font-size:12px; color:var(--text-muted); padding:20px; opacity: 0.7;}
 </style>
@@ -248,7 +171,7 @@
 
 <header>
   <span class="logo">🛒</span>
-  <h1>MarketScan</h1>
+  <h1>Market<span>Scan</span></h1>
 </header>
 
 <div class="mode-tabs">
@@ -259,7 +182,6 @@
 <main>
   <div id="alertBox" class="alert"></div>
 
-  <!-- Barkod elle giriş -->
   <div class="card">
     <div class="section-title">Elle Barkod Girişi</div>
     <div class="manual-row">
@@ -268,7 +190,6 @@
     </div>
   </div>
 
-  <!-- Kamera / tarayıcı -->
   <div class="card">
     <div class="section-title">Kamera ile Tara</div>
     <div class="scanner-wrap">
@@ -280,7 +201,6 @@
     <button id="stopBtn" class="btn btn-ghost hidden">⏹ Kamerayı Durdur</button>
   </div>
 
-  <!-- Tekli mod ürün kartı -->
   <div id="productCard" class="card product-info">
     <div class="p-header">
       <div>
@@ -289,16 +209,13 @@
       </div>
       <span class="badge" id="pCategory">—</span>
     </div>
-    
     <div class="p-grid">
       <div class="p-item"><div class="k">Barkod</div><div class="v" id="pBarcode">—</div></div>
       <div class="p-item"><div class="k">Miktar</div><div class="v" id="pQuantity">—</div></div>
     </div>
-    
     <div class="price-tag" id="pPrice">0,00 ₺</div>
   </div>
 
-  <!-- Sepet modu listesi -->
   <div id="cartCard" class="card hidden">
     <div class="section-title">Sepetteki Ürünler</div>
     <ul id="cartList" class="cart-list"></ul>
@@ -306,7 +223,6 @@
   </div>
 </main>
 
-<!-- Sepet toplam çubuğu -->
 <div id="cartBar" class="cart-total">
   <div>
     <div class="label">Toplam (<span id="cartCount">0</span> ürün)</div>
@@ -315,55 +231,21 @@
   <button id="clearCartBtn">Temizle</button>
 </div>
 
-<footer>Görüntü işleme cihaz üzerinde (BarcodeDetector API) yapılır.</footer>
+<footer>Görüntü işleme cihaz üzerinde (ZXing) yapılır. iOS & Android uyumludur.</footer>
+
+<!-- ZXing Kütüphanesi (CDN) -->
+<script src="https://unpkg.com/@zxing/library@0.21.3"></script>
 
 <script>
 /* =========================================================
-   1) ÜRÜN VERİ TABANI (JSON) — Fotoğraftaki + 2 Ek Ürün
+   1) ÜRÜN VERİ TABANI (JSON)
    ========================================================= */
 const PRODUCTS = [
-  // --- FOTOĞRAFTAN GELENLER ---
-  { 
-    barcode: "8690632041827", 
-    name: "Toz Kahve", 
-    brand: "Nescafe", 
-    category: "Gıda", 
-    price: 15.00, 
-    quantity: "10 gram" 
-  },
-  { 
-    barcode: "4015000090940", 
-    name: "Stick Yapıştırıcı", 
-    brand: "Pritt", 
-    category: "Kırtasiye", 
-    price: 80.00, 
-    quantity: "43 gram" 
-  },
-  { 
-    barcode: "8690857011964", 
-    name: "10 Numara Zımba Teli", 
-    brand: "3A", 
-    category: "Kırtasiye", 
-    price: 35.00, 
-    quantity: "1000 adet" 
-  },
-  // --- ALIŞTIRMA ŞARTI (En az 5 ürün) İÇİN EKLENENLER ---
-  { 
-    barcode: "8690000000001", 
-    name: "Süt", 
-    brand: "Sütaş", 
-    category: "Gıda", 
-    price: 32.50, 
-    quantity: "1 L" 
-  },
-  { 
-    barcode: "8690000000002", 
-    name: "Bulaşık Deterjanı", 
-    brand: "Fairy", 
-    category: "Temizlik", 
-    price: 89.90, 
-    quantity: "900 ml" 
-  }
+  { barcode: "8690632041827", name: "Toz Kahve", brand: "Nescafe", category: "Gıda", price: 15.00, quantity: "10 gram" },
+  { barcode: "4015000090940", name: "Stick Yapıştırıcı", brand: "Pritt", category: "Kırtasiye", price: 80.00, quantity: "43 gram" },
+  { barcode: "8690857011964", name: "10 Numara Zımba Teli", brand: "3A", category: "Kırtasiye", price: 35.00, quantity: "1000 adet" },
+  { barcode: "8690000000001", name: "Süt", brand: "Sütaş", category: "Gıda", price: 32.50, quantity: "1 L" },
+  { barcode: "8690000000002", name: "Bulaşık Deterjanı", brand: "Fairy", category: "Temizlik", price: 89.90, quantity: "900 ml" }
 ];
 
 const PRODUCT_MAP = new Map(PRODUCTS.map(p => [p.barcode, p]));
@@ -390,17 +272,16 @@ function showAlert(msg, type="error"){
    3) UYGULAMA DURUMU
    ========================================================= */
 const state = {
-  mode: "single",        
-  cart: [],              
-  lastScan: { code:null, time:0 }, 
+  mode: "single",
+  cart: [],
+  lastScan: { code:null, time:0 },
   scanning: false,
-  stream: null,
-  detector: null,
-  rafId: null,
+  codeReader: null,      // ZXing BrowserMultiFormatReader
+  controls: null,        // ZXing tarayıcı kontrolü
   lastProduct: null
 };
 
-const DEDUPE_MS = 1500; 
+const DEDUPE_MS = 1500;
 
 /* =========================================================
    4) MOD DEĞİŞTİRME
@@ -425,7 +306,7 @@ $("tab-single").addEventListener("click", () => setMode("single"));
 $("tab-cart").addEventListener("click", () => setMode("cart"));
 
 /* =========================================================
-   5) ÜRÜN GÖSTERİMİ (Tekli mod)
+   5) ÜRÜN GÖSTERİMİ
    ========================================================= */
 function renderProduct(p){
   state.lastProduct = p;
@@ -451,10 +332,7 @@ function removeFromCart(uid){
   state.cart = state.cart.filter(i => i.uid !== uid);
   renderCart();
 }
-function clearCart(){
-  state.cart = [];
-  renderCart();
-}
+function clearCart(){ state.cart = []; renderCart(); }
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 }
@@ -462,7 +340,6 @@ function renderCart(){
   const list = $("cartList");
   const empty = $("emptyCart");
   list.innerHTML = "";
-
   if(state.cart.length === 0){
     empty.style.display = "block";
     list.classList.remove("show");
@@ -503,20 +380,16 @@ function processBarcode(code){
   if(!code) return;
 
   const now = Date.now();
-  if(state.lastScan.code === code && (now - state.lastScan.time) < DEDUPE_MS){
-    return;
-  }
+  if(state.lastScan.code === code && (now - state.lastScan.time) < DEDUPE_MS) return;
   state.lastScan = { code, time: now };
 
   const product = PRODUCT_MAP.get(code);
-
   if(!product){
     showAlert("Ürün bulunamadı.", "error");
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Hata titremesi
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     return;
   }
-
-  if (navigator.vibrate) navigator.vibrate(50); // Başarı titremesi
+  if (navigator.vibrate) navigator.vibrate(50);
 
   if(state.mode === "single"){
     renderProduct(product);
@@ -540,7 +413,7 @@ $("manualInput").addEventListener("keydown", e => {
 });
 
 /* =========================================================
-   9) KAMERA + BarcodeDetector
+   9) KAMERA + ZXING (iOS Uyumlu)
    ========================================================= */
 function setScannerMsg(msg){ $("scannerMsg").textContent = msg; }
 
@@ -548,36 +421,34 @@ async function startCamera(){
   const alertBox = $("alertBox");
   alertBox.classList.remove("show");
 
-  if(!("BarcodeDetector" in window)){
-    showAlert("BarcodeDetector API desteklenmiyor. Elle giriş yapın.", "error");
-    setScannerMsg("API Desteklenmiyor.");
+  // ZXing kütüphanesi yüklü mü?
+  if(typeof ZXing === "undefined" || !ZXing.BrowserMultiFormatReader){
+    showAlert("Barkod okuyucu kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.", "error");
+    setScannerMsg("Kütüphane hatası.");
     return;
   }
 
   try{
-    const supported = await BarcodeDetector.getSupportedFormats();
-    const wanted = ["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf"].filter(f => supported.includes(f));
-    
-    if(wanted.length === 0){
-      showAlert("Desteklenen barkod formatı bulunamadı.", "error");
-      return;
-    }
-    state.detector = new BarcodeDetector({ formats: wanted });
+    // ZXing okuyucuyu oluştur (EAN-13, EAN-8, Code128, Code39, ITF, UPC vb. destekler)
+    state.codeReader = new ZXing.BrowserMultiFormatReader();
 
-    state.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false
-    });
-
-    const video = $("video");
-    video.srcObject = state.stream;
-    await video.play();
+    // Kamera izni ve yayınını başlat, sürekli tarama yap
+    state.controls = await state.codeReader.decodeFromVideoDevice(
+      null, // varsayılan kamera
+      "video",
+      (result, err) => {
+        if (result) {
+          // Barkod başarıyla okundu
+          processBarcode(result.getText());
+        }
+        // NotFoundException normaldir (kare içinde barkod yok), yoksay
+      }
+    );
 
     state.scanning = true;
     $("startBtn").classList.add("hidden");
     $("stopBtn").classList.remove("hidden");
     setScannerMsg("Barkodu kadraja getirin...");
-    scanLoop();
 
   } catch(err){
     if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")){
@@ -594,29 +465,20 @@ async function startCamera(){
   }
 }
 
-function scanLoop(){
-  if(!state.scanning) return;
-  const video = $("video");
-  if(video.readyState >= 2 && state.detector){
-    state.detector.detect(video).then(codes => {
-      if(codes && codes.length > 0){
-        const raw = codes[0].rawValue;
-        if(raw) processBarcode(raw);
-      }
-    }).catch(() => {});
-  }
-  state.rafId = requestAnimationFrame(() => setTimeout(scanLoop, 200)); 
-}
-
 function stopCamera(){
   state.scanning = false;
-  if(state.rafId){ cancelAnimationFrame(state.rafId); state.rafId = null; }
-  if(state.stream){
-    state.stream.getTracks().forEach(t => t.stop());
-    state.stream = null;
+  if(state.controls){
+    state.controls.stop();
+    state.controls = null;
+  }
+  if(state.codeReader){
+    state.codeReader.reset();
   }
   const video = $("video");
-  video.srcObject = null;
+  if(video.srcObject){
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
   $("startBtn").classList.remove("hidden");
   $("stopBtn").classList.add("hidden");
   setScannerMsg("Kamera durduruldu.");
