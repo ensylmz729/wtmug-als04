@@ -83,6 +83,43 @@
     background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     color:#fff; font-size:14px; text-align:center; font-weight: 500;
   }
+  
+  /* --- KAMERA KONTROLLERİ (Flaş & Zoom) --- */
+  .camera-controls {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    padding: 12px; background: var(--bg); border-radius: 14px; border: 1px solid var(--border);
+  }
+  .flash-btn {
+    background: var(--card); border: 2px solid var(--border); color: var(--text-muted);
+    width: 48px; height: 48px; border-radius: 12px; font-size: 20px; cursor: pointer;
+    display: flex; justify-content: center; align-items: center; transition: 0.2s;
+    flex-shrink: 0;
+  }
+  .flash-btn.active {
+    background: var(--accent); color: var(--primary-dark); border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+  }
+  .flash-btn:active { transform: scale(0.95); }
+  
+  .zoom-container {
+    flex: 1; display: flex; align-items: center; gap: 10px;
+  }
+  .zoom-container span { font-size: 18px; color: var(--text-muted); }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none; width: 100%; background: transparent;
+  }
+  input[type=range]:focus { outline: none; }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 6px; cursor: pointer; background: var(--border);
+    border-radius: 3px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    height: 20px; width: 20px; border-radius: 50%; background: var(--primary);
+    cursor: pointer; -webkit-appearance: none; margin-top: -7px;
+    box-shadow: 0 2px 6px rgba(123,31,46,0.3);
+  }
+  .hidden-ctrl { display: none !important; }
+
   .btn{
     width:100%; padding:16px; border:none; border-radius:14px; font-size:16px;
     font-family: inherit; font-weight:700; cursor:pointer; transition:all 0.2s;
@@ -197,6 +234,16 @@
       <div class="scan-frame"></div>
       <div id="scannerMsg" class="scanner-msg">Kamera hazır.</div>
     </div>
+    
+    <!-- KAMERA KONTROLLERİ (Flaş ve Zoom) -->
+    <div id="cameraControls" class="camera-controls hidden-ctrl">
+      <button id="flashBtn" class="flash-btn" title="Flaş Aç/Kapat">⚡</button>
+      <div id="zoomContainer" class="zoom-container hidden-ctrl">
+        <span>🔍</span>
+        <input type="range" id="zoomSlider" min="1" max="1" step="0.1" value="1">
+      </div>
+    </div>
+
     <button id="startBtn" class="btn btn-primary">📷 Kamerayı Başlat</button>
     <button id="stopBtn" class="btn btn-ghost hidden">⏹ Kamerayı Durdur</button>
   </div>
@@ -276,9 +323,11 @@ const state = {
   cart: [],
   lastScan: { code:null, time:0 },
   scanning: false,
-  codeReader: null,      // ZXing BrowserMultiFormatReader
-  controls: null,        // ZXing tarayıcı kontrolü
-  lastProduct: null
+  codeReader: null,
+  controls: null,
+  lastProduct: null,
+  videoTrack: null,  // Zoom ve flaş için donanım izi
+  flashOn: false
 };
 
 const DEDUPE_MS = 1500;
@@ -413,15 +462,43 @@ $("manualInput").addEventListener("keydown", e => {
 });
 
 /* =========================================================
-   9) KAMERA + ZXING (iOS Uyumlu)
+   9) KAMERA + ZXING (iOS Uyumlu, Flaş ve Zoom destekli)
    ========================================================= */
 function setScannerMsg(msg){ $("scannerMsg").textContent = msg; }
+
+// Flaş Kontrolü
+$("flashBtn").addEventListener("click", async () => {
+  if(!state.videoTrack) return;
+  try {
+    state.flashOn = !state.flashOn;
+    await state.videoTrack.applyConstraints({
+      advanced: [{ torch: state.flashOn }]
+    });
+    $("flashBtn").classList.toggle("active", state.flashOn);
+  } catch (err) {
+    showAlert("Bu cihaz flaş özelliğini desteklemiyor.", "warn");
+    state.flashOn = false;
+    $("flashBtn").classList.remove("active");
+  }
+});
+
+// Zoom Kontrolü
+$("zoomSlider").addEventListener("input", async (e) => {
+  if(!state.videoTrack) return;
+  const zoomValue = parseFloat(e.target.value);
+  try {
+    await state.videoTrack.applyConstraints({
+      advanced: [{ zoom: zoomValue }]
+    });
+  } catch (err) {
+    // Zoom desteklenmiyorsa sessizce geç
+  }
+});
 
 async function startCamera(){
   const alertBox = $("alertBox");
   alertBox.classList.remove("show");
 
-  // ZXing kütüphanesi yüklü mü?
   if(typeof ZXing === "undefined" || !ZXing.BrowserMultiFormatReader){
     showAlert("Barkod okuyucu kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.", "error");
     setScannerMsg("Kütüphane hatası.");
@@ -429,19 +506,14 @@ async function startCamera(){
   }
 
   try{
-    // ZXing okuyucuyu oluştur (EAN-13, EAN-8, Code128, Code39, ITF, UPC vb. destekler)
     state.codeReader = new ZXing.BrowserMultiFormatReader();
-
-    // Kamera izni ve yayınını başlat, sürekli tarama yap
+    
+    // ZXing kamerayı başlattıktan sonra video elementini alıp donanım yeteneklerini kontrol edeceğiz.
     state.controls = await state.codeReader.decodeFromVideoDevice(
-      null, // varsayılan kamera
+      null,
       "video",
       (result, err) => {
-        if (result) {
-          // Barkod başarıyla okundu
-          processBarcode(result.getText());
-        }
-        // NotFoundException normaldir (kare içinde barkod yok), yoksay
+        if (result) processBarcode(result.getText());
       }
     );
 
@@ -449,6 +521,38 @@ async function startCamera(){
     $("startBtn").classList.add("hidden");
     $("stopBtn").classList.remove("hidden");
     setScannerMsg("Barkodu kadraja getirin...");
+
+    // Kamera stream'ine ulaş (Flaş ve Zoom için)
+    const videoElement = $("video");
+    if (videoElement.srcObject) {
+      state.videoTrack = videoElement.srcObject.getVideoTracks()[0];
+      const capabilities = state.videoTrack.getCapabilities ? state.videoTrack.getCapabilities() : {};
+      
+      // Flaş (Torch) Desteği
+      if (capabilities.torch) {
+        $("flashBtn").classList.remove("hidden-ctrl");
+      } else {
+        $("flashBtn").classList.add("hidden-ctrl");
+      }
+
+      // Zoom Desteği
+      if (capabilities.zoom) {
+        $("zoomContainer").classList.remove("hidden-ctrl");
+        $("zoomSlider").min = capabilities.zoom.min || 1;
+        $("zoomSlider").max = capabilities.zoom.max || 5;
+        $("zoomSlider").step = capabilities.zoom.step || 0.1;
+        $("zoomSlider").value = capabilities.zoom.min || 1;
+      } else {
+        $("zoomContainer").classList.add("hidden-ctrl");
+      }
+
+      // Eğer flaş veya zoom destekleniyorsa kontrol alanını göster
+      if (capabilities.torch || capabilities.zoom) {
+        $("cameraControls").classList.remove("hidden-ctrl");
+      } else {
+        $("cameraControls").classList.add("hidden-ctrl");
+      }
+    }
 
   } catch(err){
     if(err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")){
@@ -467,6 +571,12 @@ async function startCamera(){
 
 function stopCamera(){
   state.scanning = false;
+  state.flashOn = false;
+  state.videoTrack = null;
+  
+  $("flashBtn").classList.remove("active");
+  $("cameraControls").classList.add("hidden-ctrl");
+
   if(state.controls){
     state.controls.stop();
     state.controls = null;
